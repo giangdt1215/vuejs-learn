@@ -1,0 +1,218 @@
+Vue cho phep tao cac block co the tai su dung goi la component
+
+1 Component duoc viet boi 1 cu phap HTML template dac biet
+
+* Vue co the duoc tich hop vao project da co bang the <script>
+	Dev: <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+	Production: <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+* Tuy nhien, de build 1 app phuc tap ta nen dung Vue CLI
+* 1 vue project gom co cau truc file:
++ package.json: chua thong tin dependency cua project
++ yarn.lock: chua thong tin duoc generate cua dependency
++ babel.config.js: config cho Babel, chuyen doi js feature moi sang cu phap cu de ho tro tuong thich
++ jsconfig.json: config cho VS code
++ public: chua static assets nhung khong duoc xu ly boi Webpack trong qua trinh build
+	+ favicon.ico: favicon cua app
+	+ index.html: template cua app, vue chay tu file nay, co the dung lodash template de nhung gia tri
++ src: chua file code
+	+ main.js: doi dau vao cua app, ta thuong register global components hoac lib o file nay
+	+ App.vue: top-level component
+	+ components: chua cac component con
+	+ assets: chua cac static assets: css, images,.... vi o trong src nen co the xu ly boi Webpack(dung sass, scss, stylus)
+	
+* Vue cho phep dong goi tat ca template, logic, styling cua 1 component vao 1 file .vue
++ <template>: chua cac html template, hien thi logic cua component
++ <script>: chua cac logic khong hien thi, mac dinh can co 1 default exported JS object. object nay chua thong tin component, dinh nghia props, xu ly local state, dinh nghia method,...
++ <style>: chua css cho component, neu them attr scoped thi css chi duoc gen cho component su dung.
+	<template>
+	  <img alt="Vue logo" src="./assets/logo.png">
+	  <HelloWorld msg="Welcome to Your Vue.js App"/>
+	</template>
+
+	<script>
+	import HelloWorld from './components/HelloWorld.vue'
+
+	export default {
+	  name: 'App',
+	  components: {
+		HelloWorld
+	  }
+	}
+	</script>
+
+	<style>
+	#app {
+	  font-family: Avenir, Helvetica, Arial, sans-serif;
+	  margin-top: 60px;
+	}
+	</style>
+	
+* dang ky component noi bo thi component do chi duoc su dung noi tai 
+	export default {
+	  name: "App",
+	  components: {
+		//You can register components locally here.
+		HelloWorld,
+	  },
+	};
+* neu register component ma khong su dung thi Vue se bao loi
+* neu <template> trong rong thi Vue bao loi 'The template requires child element'
+
+* yarn serve de chay project for dev
+* Ten file component o dang PascalCase: ToDoItem.vue
+* Dung component trong <template> co the dinh dang ten component qua dang tag kebab-case: <to-do-item>
+
+* Them props vao component
+Vue co 2 cach them props:
++ liet ke props duoi dang array string, moi phan tu tuong ung voi ten props	
++ dinh nghia dang object, moi key tuong ung ten prop, lam cach nay co the gan default value, danh dau required props
+	export default {
+	  props: {
+		label: { required: true, type: String },
+		done: { default: false, type: Boolean },
+	  },
+	};
+-> Cach dung: <label for="todo-item">{{ label }}</label>
+
+* {{}} cu phap Vue se in ra ket qua cua bieu thuc ben trong vao template. chi in ra dang text
+
+* Component state qua Vue data object.
+Vue data property la noi quan ly state noi bo cua component chua no. khai bao trong component object.
+	data() {
+	  return {
+		key: value
+	  }
+	}
+* data dang function cho phep cac state la duy nhay voi moi component tai runtime
+-> co the dung this de truy cap voi cac props,... tu ben trong data()
+-> khong nen viet data() dang arrow function, vi this trong arrow function bind toi parent -> khong truy cap cac props cua component duoc.
+* data se return 1 object chua cac state.
+	export default {
+	  props: {
+		label: { required: true, type: String },
+		done: { default: false, type: Boolean },
+	  },
+	  data() {
+		return {
+		  isDone: this.done,
+		};
+	  },
+	};
+* can de ten data la unique.
+* Bind js express to html element and components: v-bind:attribute="expression" || :attribute="expression"
+	<input type="checkbox" id="todo-item" v-bind:checked="isDone" />
+
+	<input type="checkbox" id="todo-item" :checked="isDone" />
+
+* doi voi type khac string, can dung them v-bind, : truoc prop de khong bi convert sang string
+	<to-do-item label="My ToDo Item" :done="true"></to-do-item>
+	
+* Render list in Vue: v-for directive
+	<div v-for="item in items">
+	  {{ item.text }}
+	</div>
+
+Co the dung index hoac key voi v-for
+	<div v-for="(item, index) in items"></div>
+	<div v-for="(value, key) in object"></div>
+	<div v-for="(value, name, index) in object"></div>
+	
+* Cac directive duoc viet nhu 1 attriute trong html tag
+* v-for dung expression nhu sau: v-for="item in items", items la 1 array, item la phan tu trong array
+* key attribute nen duoc gan voi v-for
+
+* Tao handler method, bind voi event qua v-on
+Them handler method qua methods property trong component object.
+
+* v-on dung cu phap: v-on:event="method" hoac @event="method"
+	<form @submit="handleSubmit">…</form>
+	
+* de ngan hanh vi mac dinh khi co event, Vue cung cap event modifiers, cac modifier duoc them vao sau event voi dau '.'
++ .stop: stop event from propagating. stopPropagation()
++ .prevent: prevent default behavior. preventDefault()
++ .self: goi handler chi khi su kien duoc phat di boi chinh element
++ {.key}: phat event qua key
++ .native: lang nghe 1 su kien o root
++ .once: lang nghe su kien 1 lan duy nhat
++ .left: chi goi handler voi event chuot trai
++ .right: chi goi handler voi event chuot phai
++ .middle: chi goi handler voi event nut giau cua chuot
++ .passive: tuong duong voi {passive: true} khi tao 1 event listener bang vanila js
+
+-> de ngan hanh dong submit cua browser ta dung .prevent:
+	<form @submit.prevent="onSubmit">…</form>
+
+** Bind data voi input qua v-model
+ta co the bind data property(state) cua component voi <input>,<select>,<textarea> qua v-model voi cu phap:
+	v-model="variable"
+->	<template>
+		<input
+		  type="text"
+		  id="new-todo-input"
+		  name="new-todo"
+		  autocomplete="off"
+		  v-model="label" />
+	</template>
+
+	export default {
+		methods: {
+		  onSubmit() {
+			console.log('Label value: ', this.label);
+		  }
+		},
+	  data() {
+		return {
+		  label: "",
+		};
+	  },
+	};
+** v-model co 3 modifier:
++ .lazy: lang nghe su kien change thay cho input
+	binh thuong Vue v-model thay doi data voi tung keystroke
+	.lazy thay doi su kien sang change event: khi lose focus input hoac form submitted
++ .number: ep input string sang number
++ .trim: trim input -> v-model.trim="label"
+*** trong component, data attributes duoc truy cap qua this
+
+** Truyen data den parent component voi custom event
+ emit custom event chua data de parant component lang nghe qua this.$emit([ten custom event], [data])
+	methods: {
+		handleSubmit() {
+		  this.$emit("todo-added", this.label);
+		}
+	},
+	 
+-> parent component: 	 
+	<to-do-form @todo-added="addToDo"></to-do-form>
+-> @[ten custom event] = "[method duoc call khi nhan custom event o parent component]"
+
+	methods: {
+    addToDo(todoLabel) {
+      console.log("To-do added", todoLabel);
+    }
+  }
+* nhan data tu child component qua param method trong parent package
+
+** Css trong Vue
+co 3 cach dung css trong Vue:
++ dung file css rieng, tao file css trong folder assets, import file css trong main.js
++ them global css trong App component <style> tag
++ them scope vao tag <style> neu chi muon css cho rieng component hien tai
+
+** Dung Vue computed properties.
+	<h2>
+	  {{ToDoItems.filter(item => item.done).length}} out of
+	  {{ToDoItems.length}} items completed
+	</h2>
+-> Viet nhu tren se dan toi viec recalculate sau moi render
+-> dung computed properties, computed props tuong tu nhu 1 method nhung chi re run khi cac dependencies thay doi gia tri.
+-> de dung computed props, can them computed property trong component object
+	export default {
+		computed: {
+		  listSummary() {
+			const numberFinishedItems = this.ToDoItems.filter((item) =>item.done).length
+			return `${numberFinishedItems} out of ${this.ToDoItems.length} items completed`
+		  }
+		}
+	}
